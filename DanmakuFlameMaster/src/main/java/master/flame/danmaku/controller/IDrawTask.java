@@ -18,7 +18,9 @@ package master.flame.danmaku.controller;
 
 import master.flame.danmaku.danmaku.model.AbsDisplayer;
 import master.flame.danmaku.danmaku.model.BaseDanmaku;
+import master.flame.danmaku.danmaku.model.IDanmakus;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
+import master.flame.danmaku.danmaku.renderer.IRenderer;
 import master.flame.danmaku.danmaku.renderer.IRenderer.RenderingState;
 
 public interface IDrawTask {
@@ -31,7 +33,9 @@ public interface IDrawTask {
 
     public void clearDanmakusOnScreen(long currMillis);
 
-    public RenderingState draw(AbsDisplayer<?> displayer);
+	public IDanmakus getVisibleDanmakusOnTime(long time);
+
+    public RenderingState draw(AbsDisplayer displayer);
 
     public void reset();
 
@@ -47,12 +51,18 @@ public interface IDrawTask {
 
     public void setParser(BaseDanmakuParser parser);
 
+    void invalidateDanmaku(BaseDanmaku item, boolean remeasure);
+
     public interface TaskListener {
         public void ready();
 
         public void onDanmakuAdd(BaseDanmaku danmaku);
 
+        public void onDanmakuShown(BaseDanmaku danmaku);
+
         public void onDanmakuConfigChanged();
+
+        public void onDanmakusDrawingFinished();
     }
 
     public void requestHide();
