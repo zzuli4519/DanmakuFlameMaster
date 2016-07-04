@@ -16,18 +16,17 @@
 
 package master.flame.danmaku.danmaku.renderer.android;
 
-import master.flame.danmaku.danmaku.util.SystemClock;
-
 import master.flame.danmaku.danmaku.model.BaseDanmaku;
 import master.flame.danmaku.danmaku.model.DanmakuTimer;
-import master.flame.danmaku.danmaku.model.GlobalFlagValues;
 import master.flame.danmaku.danmaku.model.ICacheManager;
 import master.flame.danmaku.danmaku.model.IDanmakuIterator;
 import master.flame.danmaku.danmaku.model.IDanmakus;
 import master.flame.danmaku.danmaku.model.IDisplayer;
+import master.flame.danmaku.danmaku.model.IDrawingCache;
 import master.flame.danmaku.danmaku.model.android.DanmakuContext;
 import master.flame.danmaku.danmaku.renderer.IRenderer;
 import master.flame.danmaku.danmaku.renderer.Renderer;
+import master.flame.danmaku.danmaku.util.SystemClock;
 
 
 public class DanmakuRenderer extends Renderer {
@@ -52,7 +51,7 @@ public class DanmakuRenderer extends Renderer {
 
     public DanmakuRenderer(DanmakuContext config) {
         mContext = config;
-        mDanmakusRetainer = new DanmakusRetainer();
+        mDanmakusRetainer = new DanmakusRetainer(config.isAlignBottom());
     }
 
     @Override
@@ -100,9 +99,9 @@ public class DanmakuRenderer extends Renderer {
             }
 
             if (drawItem.isLate()) {
-                if (mCacheManager != null && !drawItem.hasDrawingCache()) {
+                IDrawingCache<?> cache = drawItem.getDrawingCache();
+                if (mCacheManager != null && (cache == null || cache.get() == null)) {
                     mCacheManager.addDanmaku(drawItem);
-                    continue;
                 }
                 break;
             }
@@ -168,5 +167,11 @@ public class DanmakuRenderer extends Renderer {
     @Override
     public void removeOnDanmakuShownListener() {
         mOnDanmakuShownListener = null;
+    }
+
+    public void alignBottom(boolean enable) {
+        if (mDanmakusRetainer != null) {
+            mDanmakusRetainer.alignBottom(enable);
+        }
     }
 }

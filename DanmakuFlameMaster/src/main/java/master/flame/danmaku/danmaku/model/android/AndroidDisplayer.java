@@ -32,6 +32,7 @@ import java.util.Map;
 import master.flame.danmaku.danmaku.model.AbsDisplayer;
 import master.flame.danmaku.danmaku.model.AlphaValue;
 import master.flame.danmaku.danmaku.model.BaseDanmaku;
+import master.flame.danmaku.danmaku.model.IDrawingCache;
 import master.flame.danmaku.danmaku.renderer.IRenderer;
 
 public class AndroidDisplayer extends AbsDisplayer<Canvas, Typeface> {
@@ -272,8 +273,9 @@ public class AndroidDisplayer extends AbsDisplayer<Canvas, Typeface> {
             // drawing cache
             boolean cacheDrawn = false;
             int result = IRenderer.CACHE_RENDERING;
-            if (danmaku.hasDrawingCache()) {
-                DrawingCacheHolder holder = ((DrawingCache) danmaku.cache).get();
+            IDrawingCache<?> cache = danmaku.getDrawingCache();
+            if (cache != null) {
+                DrawingCacheHolder holder = (DrawingCacheHolder) cache.get();
                 if (holder != null) {
                     cacheDrawn = holder.draw(canvas, left, top, alphaPaint);
                 }
@@ -322,7 +324,7 @@ public class AndroidDisplayer extends AbsDisplayer<Canvas, Typeface> {
     }
 
     @Override
-    public void drawDanmaku(BaseDanmaku danmaku, Canvas canvas, float left, float top,
+    public synchronized void drawDanmaku(BaseDanmaku danmaku, Canvas canvas, float left, float top,
                             boolean fromWorkerThread) {
         float _left = left;
         float _top = top;
@@ -421,7 +423,7 @@ public class AndroidDisplayer extends AbsDisplayer<Canvas, Typeface> {
         return UNDERLINE_PAINT;
     }
 
-    private TextPaint getPaint(BaseDanmaku danmaku, boolean fromWorkerThread) {
+    private synchronized TextPaint getPaint(BaseDanmaku danmaku, boolean fromWorkerThread) {
         TextPaint paint;
         if (fromWorkerThread) {
             paint = PAINT;

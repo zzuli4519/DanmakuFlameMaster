@@ -177,12 +177,14 @@ public class DrawHandler extends Handler {
         int what = msg.what;
         switch (what) {
             case PREPARE:
+                mTimeBase = SystemClock.uptimeMillis();
                 if (mParser == null || !mDanmakuView.isViewReady()) {
                     sendEmptyMessageDelayed(PREPARE, 100);
                 } else {
                     prepare(new Runnable() {
                         @Override
                         public void run() {
+                            pausedPosition = 0;
                             mReady = true;
                             if (mCallback != null) {
                                 mCallback.prepared();
@@ -227,11 +229,11 @@ public class DrawHandler extends Handler {
                     Long position = (Long) msg.obj;
                     long deltaMs = position - timer.currMillisecond;
                     mTimeBase -= deltaMs;
-                    timer.update(SystemClock.uptimeMillis() - mTimeBase);
+                    timer.update(position);
                     mContext.mGlobalFlagValues.updateMeasureFlag();
                     if (drawTask != null)
-                        drawTask.seek(timer.currMillisecond);
-                    pausedPosition = timer.currMillisecond;
+                        drawTask.seek(position);
+                    pausedPosition = position;
                 }
             case RESUME:
                 quitFlag = false;
@@ -261,6 +263,8 @@ public class DrawHandler extends Handler {
                 Boolean updateFlag = (Boolean) msg.obj;
                 if (updateFlag != null && updateFlag) {
                     mContext.mGlobalFlagValues.updateMeasureFlag();
+                    mContext.mGlobalFlagValues.updateVisibleFlag();
+                    drawTask.requestClearRetainer();
                 }
                 break;
             case HIDE_DANMAKUS:
@@ -287,11 +291,11 @@ public class DrawHandler extends Handler {
                 }
                 quitFlag = true;
                 syncTimerIfNeeded();
+                pausedPosition = timer.currMillisecond;
                 if (mThread != null) {
                     notifyRendering();
                     quitUpdateThread();
                 }
-                pausedPosition = timer.currMillisecond;
                 if (what == QUIT){
                     if (this.drawTask != null){
                         this.drawTask.quit();
@@ -703,9 +707,9 @@ public class DrawHandler extends Handler {
         }
     }
 
-    public void removeAllDanmakus() {
+    public void removeAllDanmakus(boolean isClearDanmakusOnScreen) {
         if (drawTask != null) {
-            drawTask.removeAllDanmakus();
+            drawTask.removeAllDanmakus(isClearDanmakusOnScreen);
         }
     }
 

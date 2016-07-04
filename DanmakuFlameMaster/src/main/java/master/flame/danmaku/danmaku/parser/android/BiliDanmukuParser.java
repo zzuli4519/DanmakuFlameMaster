@@ -105,7 +105,7 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
             if (tagName.equals("d")) {
                 // <d p="23.826000213623,1,25,16777215,1422201084,0,057075e9,757076900">我从未见过如此厚颜无耻之猴</d>
                 // 0:时间(弹幕出现时间)
-                // 1:类型(1从左至右滚动弹幕|6从右至左滚动弹幕|5顶端固定弹幕|4底端固定弹幕|7高级弹幕|8脚本弹幕)
+                // 1:类型(1从右至左滚动弹幕|6从左至右滚动弹幕|5顶端固定弹幕|4底端固定弹幕|7高级弹幕|8脚本弹幕)
                 // 2:字号
                 // 3:颜色
                 // 4:时间戳 ?
@@ -167,7 +167,7 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    
+
                     if (textArr == null || textArr.length < 5) {
                         item = null;
                         return;
@@ -201,13 +201,25 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
                             translationStartDelay = (long) (Float.parseFloat(textArr[10]));
                         }
                     }
+                    if (isPercentageNumber(beginX)) {
+                        beginX *= DanmakuFactory.BILI_PLAYER_WIDTH;
+                    }
+                    if (isPercentageNumber(beginY)) {
+                        beginY *= DanmakuFactory.BILI_PLAYER_HEIGHT;
+                    }
+                    if (isPercentageNumber(endX)) {
+                        endX *= DanmakuFactory.BILI_PLAYER_WIDTH;
+                    }
+                    if (isPercentageNumber(endY)) {
+                        endY *= DanmakuFactory.BILI_PLAYER_HEIGHT;
+                    }
                     item.duration = new Duration(alphaDuraion);
                     item.rotationZ = rotateZ;
                     item.rotationY = rotateY;
                     mContext.mDanmakuFactory.fillTranslationData(item, beginX,
                             beginY, endX, endY, translationDuration, translationStartDelay, mDispScaleX, mDispScaleY);
                     mContext.mDanmakuFactory.fillAlphaData(item, beginAlpha, endAlpha, alphaDuraion);
-                    
+
                     if (textArr.length >= 12) {
                         // 是否有描边
                         if (!TextUtils.isEmpty(textArr[11]) && TRUE_STRING.equals(textArr[11])) {
@@ -218,7 +230,7 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
                         //TODO 字体 textArr[12]
                     }
                     if (textArr.length >= 14) {
-                        //TODO 是否有加速
+                        //TODO 是否有动画缓冲(easing)
                     }
                     if (textArr.length >= 15) {
                         // 路径数据
@@ -259,7 +271,11 @@ public class BiliDanmukuParser extends BaseDanmakuParser {
         }
 
     }
-    
+
+    private boolean isPercentageNumber(float number) {
+        return number >= 0f && number <= 1f;
+    }
+
     @Override
     public BaseDanmakuParser setDisplayer(IDisplayer disp) {
         super.setDisplayer(disp);

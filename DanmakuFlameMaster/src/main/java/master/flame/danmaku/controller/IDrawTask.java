@@ -20,14 +20,13 @@ import master.flame.danmaku.danmaku.model.AbsDisplayer;
 import master.flame.danmaku.danmaku.model.BaseDanmaku;
 import master.flame.danmaku.danmaku.model.IDanmakus;
 import master.flame.danmaku.danmaku.parser.BaseDanmakuParser;
-import master.flame.danmaku.danmaku.renderer.IRenderer;
 import master.flame.danmaku.danmaku.renderer.IRenderer.RenderingState;
 
 public interface IDrawTask {
 
     public void addDanmaku(BaseDanmaku item);
 
-    public void removeAllDanmakus();
+    public void removeAllDanmakus(boolean isClearDanmakusOnScreen);
 
     public void removeAllLiveDanmakus();
 
@@ -48,6 +47,8 @@ public interface IDrawTask {
     public void prepare();
 
     public void requestClear();
+
+    void requestClearRetainer();
 
     public void setParser(BaseDanmakuParser parser);
 

@@ -55,9 +55,16 @@ public abstract class BaseDanmaku {
     public String[] lines;
 
     /**
-     * 可保存一些数据的引用
+     * 保存一些数据的引用(库内部使用, 外部使用请用tag)
      */
     public Object obj;
+
+    /**
+     * 可保存一些自定义数据的引用(外部使用).
+     * 除非主动set null,否则不会自动释放引用.
+     * 确定你会主动set null, 否则不要使用这个字段引用大内存的对象实例.
+     */
+    public Object tag;
 
     /**
      * 文本颜色
@@ -137,7 +144,7 @@ public abstract class BaseDanmaku {
     /**
      * 重置位 measure
      */
-    private int measureResetFlag = 0;
+    public int measureResetFlag = 0;
 
     /**
      * 绘制用缓存
@@ -148,6 +155,11 @@ public abstract class BaseDanmaku {
      * 是否是直播弹幕
      */
     public boolean isLive;
+
+    /**
+     * 临时, 是否在同线程创建缓存
+     */
+    public boolean forceBuildCacheInSameThread;
 
     /**
      * 弹幕发布者id, 0表示游客
@@ -209,8 +221,8 @@ public abstract class BaseDanmaku {
         this.measureResetFlag = flags.MEASURE_RESET_FLAG;
     }
 
-    public boolean hasDrawingCache() {
-        return cache != null && cache.get() != null;
+    public IDrawingCache<?> getDrawingCache() {
+        return cache;
     }
 
     public boolean isShown() {
@@ -293,6 +305,10 @@ public abstract class BaseDanmaku {
 
     public int getAlpha() {
         return alpha;
+    }
+
+    public void setTag(Object tag) {
+        this.tag = tag;
     }
 
 }
